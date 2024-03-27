@@ -2,6 +2,7 @@ import snowflake.connector as sf
 import pandas as pd
 from pathlib import Path
 import os
+import time
 import logging
 import openpyxl
 import datetime
@@ -22,6 +23,7 @@ conn.execute("USE DATABASE odsd")
 conn.execute("USE SCHEMA odsd.mdm_audit")
 
 #table for audit file headers
+#as of 3/27/2024, table1[] is no longer needed because the headers have been uploaded into the audit_headers table 
 table1 = []
 #table for audit file details
 table2 = []
@@ -59,7 +61,7 @@ for audit_folder in audit_folders:
     else:
         
         for i in range(len(audit_files)):
-    
+            print(time.ctime(os.path.getmtime(i)))
             # print(audit_files[i])
             
             #open the audit_files[i]
@@ -69,6 +71,7 @@ for audit_folder in audit_folders:
             #iterate through audit_files[i] rows   
             for j, row in enumerate(sheet.values):
                 
+                # Note: As of 3/27/2024, logic to check for the audit header will have to change or be removed because the headers have been uploaded into the audit_headers table 
                 #first row in audit_files[i] is header row
                 if j == 0:
                     
