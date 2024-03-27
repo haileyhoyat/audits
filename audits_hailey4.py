@@ -133,7 +133,7 @@ for audit_folder in audit_folders:
                                        
                     table2.append(row_detail[:])
                     
-    # insert data into snowflake table
+    # insert data from this audit file into snowflake
     for i in table2:                           
         # print(tuple(i))
         record = str(tuple(i))
