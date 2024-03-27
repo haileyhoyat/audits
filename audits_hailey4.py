@@ -33,7 +33,7 @@ audit_folders = os.listdir(path)
 
 #For each audit_folder in LACG:
 for audit_folder in audit_folders:
-    
+    table2.clear()
     #headers for the audit code
     header_row = []
     #row details that will be inserted into table2[] 
