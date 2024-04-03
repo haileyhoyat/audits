@@ -1,0 +1,23 @@
+import os
+import shutil
+
+p1 = r'/Volumes/e$/Program Files/MDM/MDM Global System/EMEA/Audits/Reports'
+p2 = r'/Users/wmd01s/Library/CloudStorage/OneDrive-Sherwin-Williams/temp/reportheaders/'
+
+for path, folders, files in os.walk(p1):
+
+    if not files: continue
+
+    src = os.path.join(path, files[0])
+    dst_path = path.replace(p1, '') + os.sep
+    dst_folder = p2 + dst_path
+
+    # create the target dir if doesn't exist
+    if not os.path.exists(dst_folder):
+        os.makedirs(dst_folder)
+
+    # create dst file with only the first file
+    dst = p2 + dst_path + files[0]
+
+    # copy the file
+    shutil.copy2(src, dst)
