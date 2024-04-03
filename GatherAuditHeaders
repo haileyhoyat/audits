@@ -1,0 +1,36 @@
+import pandas as pd
+import glob
+
+# csv_files = glob.glob(r'Z:\**\*.xlsx', recursive=True)
+csv_files = glob.glob(r'/Users/wmd01s/Library/CloudStorage/OneDrive-Sherwin-Williams/temp/reportheaders/**/*.xlsx', recursive=True)
+output = open(r'/Users/wmd01s/Library/CloudStorage/OneDrive-Sherwin-Williams/temp/EMEA-Report-Headers-20240403.txt', 'w')
+
+# Done - /Volumes/e$/Program Files/MDM/MDM Global System/LACG BR/Audits/Reports
+# Done - /Volumes/e$/Program Files/MDM/MDM Global System/LACG/Audits/Reports
+# DONE - /Volumes/e$/Program Files/MDM/MDM Global System/EMEA/Audits/Reports
+# Done - /Volumes/e$/Program Files/MDM/MDM Global System/APAC/Audits/Reports
+
+df_list = []
+
+for csv_file in csv_files:
+    df = pd.read_excel(csv_file)
+    list_of_column_names = list(df.columns)
+    
+    df['AUDIT_NAME'] = csv_file
+    #df['Columns'] = list_of_column_names
+    df_list.append(df)
+    
+    # df.to_csv("/Users/wmd01s/Library/CloudStorage/OneDrive-Sherwin-Williams/temp/APAC-Report-Headers-240329.txt", index=False)
+    
+    # NOTE: you may have to adjust the index for the FolderName
+    details = str(('Audit_Name:', csv_file.split("/")[8],'FileName:', csv_file.split("\\")[-1], 'XLSColumns: ', list_of_column_names))
+    
+    # print(type(list_of_column_names))
+    output.writelines(details + '\n')
+    
+    # The printing to the console lets you know the script is still running.
+    # Better to replace with a status bar if possible.
+    # Is there a library for that?
+    
+    print('List of column names : ', csv_file, list_of_column_names)
+output.close()
