@@ -9,40 +9,25 @@ import datetime
 import csv
 import re
 
-# Snowflake connection setup
-# login, utilize the mdm_audit schema
-# connection = sf.connect(user='hailey.y.hoyat@sherwin.com',
-#                         password='',
-#                         account='sherwin1.east-us-2.azure',
-#                         warehouse='DIAD_WH',
-#                         database='DIAD',
-#                         schema='LACG_REPORT',
-#                         role='DW_DEVELOPER_ROLE',
-#                         authenticator='EXTERNALBROWSER')
-
-# conn = connection.cursor()
-# conn.execute("USE DATABASE odsd")
-# conn.execute("USE SCHEMA odsd.mdm_audit")
-
 #table for headers 
 table1 = []
 #table for row details
 table2 = []
 #path to each region's folder
-# path = "Z:\Program Files\MDM\MDM Global System\EMEA\Audits\Reports"
+path = "Z:\Program Files\MDM\MDM Global System\EMEA\Audits\Reports"
 # path = "Z:\Program Files\MDM\MDM Global System\APAC\Audits\Reports"
-path = "Z:\Program Files\MDM\MDM Global System\LACG\Audits\Reports"
+# path = "Z:\Program Files\MDM\MDM Global System\LACG\Audits\Reports"
 # path = "Z:\Program Files\MDM\MDM Global System\LACG BR\Audits\Reports"
 
-mdm_audit_header = 'mdm_audit_header_lacg.csv'
-mdm_audit_detail = 'mdm_audit_detail_lacg.csv'
+mdm_audit_header = 'mdm_audit_header_emea_20240425.csv'
+mdm_audit_detail = 'mdm_audit_detail_emea_20240425.csv'
 lacg_audit_list = []
 
 #get list of all LACG audit folders
 audit_folders = []
 
 #print(os.listdir())
-with open('lacg_list.csv', mode ='r')as file:
+with open('emea_list.csv', mode ='r')as file:
   csvFile = csv.reader(file)
   for lines in csvFile:
         #print(lines[1])
@@ -87,7 +72,7 @@ for audit_folder in audit_folders:
             current_date = datetime.datetime.today()
             current_date_str = datetime.datetime.strftime(current_date, '%y-%m-%d %H:%M:%S')
             yesterday_date = current_date - datetime.timedelta(days = 1)
-            set_date = datetime.datetime.strptime('24-04-15', '%y-%m-%d')            
+            set_date = datetime.datetime.strptime('24-04-25', '%y-%m-%d')            
             
             #date of the audit file
             file_date = audit_files[i].split('.xlsx')[0][-15:-9:]
@@ -120,7 +105,7 @@ for audit_folder in audit_folders:
                         header_row.clear()
                                             
                         #iterate through each column in the header row to get the headers in audit_files[i]
-                        header_row.append('LACG') #region
+                        header_row.append('EMEA') #region
                         header_row.append(audit_folder) #audit code   
                         header_row.append(audit_files[i].split('Reports')[1].split('\\')[2]) # file name
                         header_row.append(j) # file line
@@ -156,7 +141,7 @@ for audit_folder in audit_folders:
                                 
                         row_detail.clear()
                         
-                        row_detail.append('LACG') #region
+                        row_detail.append('EMEA') #region
                         row_detail.append(audit_folder) #audit code   
                         row_detail.append(audit_files[i].split('Reports')[1].split('\\')[2]) # file name
                         row_detail.append(j) # file line
@@ -167,8 +152,8 @@ for audit_folder in audit_folders:
                                 row_detail.append("")
                             else:
                                 if isinstance(value, str):
-                                    value = re.sub(r'[^\x00-\x7F]', ' ', value)           
-                                    row_detail.append(str(value.replace("'","").replace("\"","")))
+                                    value = re.sub(r'[^\x00-\x7F]', ' ', value) #remove non ASCIII characters           
+                                    row_detail.append(str(value.replace("'","").replace("\"",""))) #remove apostraophes
                                 else:
                                     row_detail.append(value)
                         
