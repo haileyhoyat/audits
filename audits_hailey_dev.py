@@ -126,10 +126,13 @@ for audit_folder in audit_folders:
                         header_row.append(str(file_date)) # file date
                         
                         for value in row:
-                            if value is None:
-                                header_row.append("")
+                            if isinstance(value, str):
+                                value = re.sub(r'[^\x00-\x7F]', '', value) #remove non ASCIII characters
+                                value = value.replace("'","").replace("\"","").replace(",","") #remove apostraophes and commas
+                                           
+                                row_detail.append(str(value))
                             else:
-                                header_row.append(str(value))
+                                row_detail.append(value)
                         
                         # add values for the remaining fields that are blank. 
                         # Need 156 fields total. 
@@ -167,9 +170,10 @@ for audit_folder in audit_folders:
                             else:
                                 if isinstance(value, str):
                                     value = re.sub(r'[^\x00-\x7F]', '', value) #remove non ASCIII characters
+                                    value = value.replace("'","").replace("\"","").replace(",","") #remove apostraophes and commas
                                     if len(value) > 999: # make sure value is no longer than 1000 characters
                                         value = value[0:950:]           
-                                    row_detail.append(str(value.replace("'","").replace("\"",""))) #remove apostraophes
+                                    row_detail.append(str(value))
                                 else:
                                     row_detail.append(value)
                         
@@ -232,13 +236,13 @@ conn.execute("REMOVE @HAILEY_TEST/mdm_audit_detail.csv")
 conn.execute("REMOVE @HAILEY_TEST/mdm_audit_header.csv")
 conn.execute("PUT 'file://C:\\\\Users\\\\hyh399\\\\OneDrive - Sherwin-Williams\\\\Desktop\\\\repos\\\\audits-1\\\\mdm_audit_detail.csv' @HAILEY_TEST") 
 conn.execute("PUT 'file://C:\\\\Users\\\\hyh399\\\\OneDrive - Sherwin-Williams\\\\Desktop\\\\repos\\\\audits-1\\\\mdm_audit_header.csv' @HAILEY_TEST") 
-conn.execute("COPY INTO MDM_AUDIT_DETAIL FROM @HAILEY_TEST/mdm_audit_detail.csv.gz ON_ERROR = CONTINUE")
+conn.execute("COPY INTO MDM_AUDIT_DETAIL FROM @HAILEY_TEST/mdm_audit_detail.csv.gz ON_ERROR = CONTINUE FILE_FORMAT = (TYPE=CSV FIELD_DELIMITER=',' EMPTY_FIELD_AS_NULL = TRUE FIELD_OPTIONALLY_ENCLOSED_BY = '\"')")
 conn.execute("CREATE OR REPLACE TABLE MDM_AUDIT_DETAIL_ERRORS AS SELECT * FROM TABLE(VALIDATE(MDM_AUDIT_DETAIL, JOB_ID=>'_last'))")
-conn.execute("COPY INTO MDM_AUDIT_HEADER FROM @HAILEY_TEST/mdm_audit_header.csv.gz ON_ERROR = CONTINUE")
+conn.execute("COPY INTO MDM_AUDIT_HEADER FROM @HAILEY_TEST/mdm_audit_header.csv.gz ON_ERROR = CONTINUE FILE_FORMAT = (TYPE=CSV FIELD_DELIMITER=',' EMPTY_FIELD_AS_NULL = TRUE FIELD_OPTIONALLY_ENCLOSED_BY = '\"')")
 conn.execute("CREATE OR REPLACE TABLE MDM_AUDIT_HEADER_ERRORS AS SELECT * FROM TABLE(VALIDATE(MDM_AUDIT_HEADER, JOB_ID=>'_last'))")
 
-#now delete the generic header and detail files
-os.remove('mdm_audit_header.csv')
-os.remove('mdm_audit_detail.csv')
+# #now delete the generic header and detail files
+# os.remove('mdm_audit_header.csv')
+# os.remove('mdm_audit_detail.csv')
 
 print("script completed")
