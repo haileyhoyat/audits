@@ -241,8 +241,8 @@ conn.execute("CREATE OR REPLACE TABLE MDM_AUDIT_DETAIL_ERRORS AS SELECT * FROM T
 conn.execute("COPY INTO MDM_AUDIT_HEADER FROM @HAILEY_TEST/mdm_audit_header.csv.gz ON_ERROR = CONTINUE FILE_FORMAT = (TYPE=CSV FIELD_DELIMITER=',' EMPTY_FIELD_AS_NULL = TRUE FIELD_OPTIONALLY_ENCLOSED_BY = '\"')")
 conn.execute("CREATE OR REPLACE TABLE MDM_AUDIT_HEADER_ERRORS AS SELECT * FROM TABLE(VALIDATE(MDM_AUDIT_HEADER, JOB_ID=>'_last'))")
 
-# #now delete the generic header and detail files
-# os.remove('mdm_audit_header.csv')
-# os.remove('mdm_audit_detail.csv')
+#now delete the generic header and detail files
+os.remove('mdm_audit_header.csv')
+os.remove('mdm_audit_detail.csv')
 
 print("script completed")
