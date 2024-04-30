@@ -1,5 +1,3 @@
-#this script uploads audit files using the audit code table, and uses COPY INTO
-
 import snowflake.connector as sf
 import os
 import shutil
@@ -7,6 +5,8 @@ import openpyxl
 import datetime
 import csv
 import re
+
+#---------Utility needs such as logging into snowflake and setting inital variables-------------------------------------------------------------#
 
 # Snowflake connection setup
 # login, utilize the mdm_audit schema
@@ -22,6 +22,7 @@ connection = sf.connect(user='hailey.y.hoyat@sherwin.com',
 conn = connection.cursor()
 conn.execute("USE DATABASE odsd")
 conn.execute("USE SCHEMA odsd.mdm_audit")
+
 
 #table for headers 
 table1 = []
@@ -53,6 +54,8 @@ finally:
 #today's header and detail files will be named with today's date
 mdm_audit_header = 'mdm_audit_header_{0}.csv'.format(current_date_str_file)
 mdm_audit_detail = 'mdm_audit_detail_{0}.csv'.format(current_date_str_file)
+
+#---------Scrape data from newly added audits-------------------------------------------------------------#
 
 #For each audit_folder in audit_folders[]:
 for audit_folder in audit_folders:    
@@ -187,6 +190,8 @@ for audit_folder in audit_folders:
                 # print("this file is not a delta")
                 continue
 
+#--------- Create csv files containing header and detail data for the day -------------------------------------------------------------#
+
     #write data into today's header and detail files
     try:           
         with open(mdm_audit_detail, 'a', newline='') as f:
@@ -203,6 +208,8 @@ for audit_folder in audit_folders:
 # this is because Snowflake will expect a consistent file name to upload
 shutil.copyfile(mdm_audit_header, 'mdm_audit_header.csv')
 shutil.copyfile(mdm_audit_detail, 'mdm_audit_detail.csv')
+
+#---------Load today's header and detail files into snowflake -------------------------------------------------------------#
 
 # connect to Snowflake again becuase the connection will timeout by the time the scrape is completed. 
 connection = sf.connect(user='hailey.y.hoyat@sherwin.com',
@@ -235,21 +242,3 @@ os.remove('mdm_audit_header.csv')
 os.remove('mdm_audit_detail.csv')
 
 print("script completed")
-
-
-# mdm_audit_detail_errors = conn.execute("SELECT * FROM TABLE(VALIDATE(MDM_AUDIT_DETAIL, JOB_ID=>'_last'))")
-# for mdm_audit_detail_error in mdm_audit_detail_errors:
-#     print(mdm_audit_detail_errors)
-    
-
-# mdm_audit_header_errors = conn.execute("SELECT * FROM TABLE(VALIDATE(MDM_AUDIT_HEADER, JOB_ID=>'_last'))")
-# for mdm_audit_header_error in mdm_audit_header_errors:
-#     print(mdm_audit_header_error)
-
-
-# results = conn.execute("SELECT LAST_QUERY_ID(-1);")
-# for rec in results:
-#     mdm_audit_detail_queryid = rec[0]
-# results2 = conn.execute("SELECT * FROM TABLE(VALIDATE('MDM_AUDIT_DETAIL', JOB_ID=>'mdm_audit_detail_queryid'))")
-# for result in results2:
-#     print(result)
