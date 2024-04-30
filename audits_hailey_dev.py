@@ -220,15 +220,36 @@ conn.execute("USE SCHEMA odsd.mdm_audit")
 
 #upload today's audit data file into internal snowflake storage
 #load the audit file data from internal storage into mdm_audit_header and mdm_audit_detail
+#log the errors into MDM_AUDIT_HEADER_ERRORS and MDM_AUDIT_DETAIL_ERRORS
 conn.execute("REMOVE @HAILEY_TEST/mdm_audit_detail.csv") 
 conn.execute("REMOVE @HAILEY_TEST/mdm_audit_header.csv")
 conn.execute("PUT 'file://C:\\\\Users\\\\hyh399\\\\OneDrive - Sherwin-Williams\\\\Desktop\\\\repos\\\\audits-1\\\\mdm_audit_detail.csv' @HAILEY_TEST") 
 conn.execute("PUT 'file://C:\\\\Users\\\\hyh399\\\\OneDrive - Sherwin-Williams\\\\Desktop\\\\repos\\\\audits-1\\\\mdm_audit_header.csv' @HAILEY_TEST") 
 conn.execute("COPY INTO MDM_AUDIT_DETAIL FROM @HAILEY_TEST/mdm_audit_detail.csv.gz ON_ERROR = CONTINUE")
+conn.execute("CREATE OR REPLACE TABLE MDM_AUDIT_DETAIL_ERRORS AS SELECT * FROM TABLE(VALIDATE(MDM_AUDIT_DETAIL, JOB_ID=>'_last'))")
 conn.execute("COPY INTO MDM_AUDIT_HEADER FROM @HAILEY_TEST/mdm_audit_header.csv.gz ON_ERROR = CONTINUE")
+conn.execute("CREATE OR REPLACE TABLE MDM_AUDIT_HEADER_ERRORS AS SELECT * FROM TABLE(VALIDATE(MDM_AUDIT_HEADER, JOB_ID=>'_last'))")
 
 #now delete the generic header and detail files
 os.remove('mdm_audit_header.csv')
 os.remove('mdm_audit_detail.csv')
 
 print("script completed")
+
+
+# mdm_audit_detail_errors = conn.execute("SELECT * FROM TABLE(VALIDATE(MDM_AUDIT_DETAIL, JOB_ID=>'_last'))")
+# for mdm_audit_detail_error in mdm_audit_detail_errors:
+#     print(mdm_audit_detail_errors)
+    
+
+# mdm_audit_header_errors = conn.execute("SELECT * FROM TABLE(VALIDATE(MDM_AUDIT_HEADER, JOB_ID=>'_last'))")
+# for mdm_audit_header_error in mdm_audit_header_errors:
+#     print(mdm_audit_header_error)
+
+
+# results = conn.execute("SELECT LAST_QUERY_ID(-1);")
+# for rec in results:
+#     mdm_audit_detail_queryid = rec[0]
+# results2 = conn.execute("SELECT * FROM TABLE(VALIDATE('MDM_AUDIT_DETAIL', JOB_ID=>'mdm_audit_detail_queryid'))")
+# for result in results2:
+#     print(result)
